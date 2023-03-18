@@ -1,0 +1,47 @@
+#######################################
+# Syntax Coloring Map For BME68X
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+BME68X	KEYWORD1
+I2CDevice	KEYWORD1
+Oversampling	KEYWORD1
+FilterSize	KEYWORD1
+ODR	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+maxBufferSize	KEYWORD2
+read	KEYWORD2
+write	KEYWORD2
+writeThenRead	KEYWORD2
+setTOffset	KEYWORD2
+begin	KEYWORD2
+setConfig	KEYWORD2
+setHumidityOversampling	KEYWORD2
+setTemperatureOversampling	KEYWORD2
+setPressureOversampling	KEYWORD2
+setIIRFilterSize	KEYWORD2
+setODR	KEYWORD2
+setGasHeater	KEYWORD2
+performReading	KEYWORD2
+beginReading	KEYWORD2
+endReading	KEYWORD2
+remainingReadingMillis	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+ADDRESS	LITERAL1
+READING_NOT_STARTED	LITERAL1
+READING_COMPLETE	LITERAL1
