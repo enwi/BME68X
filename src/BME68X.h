@@ -62,8 +62,8 @@ public:
         /// maxBufferSize() bytes. This is const to ensure the content of this buffer doesn't change.
         /// @param prefixLen Number of bytes from prefix buffer to write
         /// @return True if write was successful, false if not.
-        bool write(const uint8_t* buffer, size_t len, bool stop = true, const uint8_t* prefixBuffer = nullptr,
-            size_t prefixLen = 0)
+        bool write(const uint8_t* buffer, const size_t len, const bool stop = true,
+            const uint8_t* prefixBuffer = nullptr, const size_t prefixLen = 0)
         {
             if ((len + prefixLen) > maxBufferSize())
             {
@@ -98,8 +98,8 @@ public:
         /// @param readLen Number of bytes from buffer to read.
         /// @param stop Whether to send an I2C STOP signal between the write and read
         /// @return True if write & read where successful, false if not.
-        bool writeThenRead(
-            const uint8_t* writeBuffer, size_t writeLen, uint8_t* readBuffer, const size_t readLen, const bool stop)
+        bool writeThenRead(const uint8_t* writeBuffer, const size_t writeLen, uint8_t* readBuffer, const size_t readLen,
+            const bool stop)
         {
             return write(writeBuffer, writeLen, stop) && read(readBuffer, readLen);
         }
@@ -139,11 +139,17 @@ public:
     /// @brief Oversampling amounts
     enum class Oversampling
     {
+        /// @brief No measurement
         NONE = BME68X_OS_NONE,
+        /// @brief Perform 1 measurement
         X1 = BME68X_OS_1X,
+        /// @brief Perform 2 measurements
         X2 = BME68X_OS_2X,
+        /// @brief Perform 4 measurements
         X4 = BME68X_OS_4X,
+        /// @brief Perform 8 measurements
         X8 = BME68X_OS_8X,
+        /// @brief Perform 16 measurements
         X16 = BME68X_OS_16X,
     };
 
@@ -240,7 +246,6 @@ public:
         {
             return false;
         }
-
         return true;
     }
 
@@ -249,14 +254,16 @@ public:
     /// @param temperature Temperature oversampling
     /// @param pressure Pressure oversampling
     /// @param iir IIR filter size
+    /// @param odr Output data rate
     /// @return True on success, false if not
-    bool setConfig(
-        const Oversampling humidity, const Oversampling temperature, const Oversampling pressure, const FilterSize iir)
+    bool setConfig(const Oversampling humidity, const Oversampling temperature, const Oversampling pressure,
+        const FilterSize iir, const ODR odr = ODR::NONE)
     {
         _config.os_hum = static_cast<uint8_t>(humidity);
         _config.os_temp = static_cast<uint8_t>(temperature);
         _config.os_pres = static_cast<uint8_t>(pressure);
         _config.filter = static_cast<uint8_t>(iir);
+        _config.odr = static_cast<uint8_t>(odr);
         return BME68X_OK == bme68x_set_conf(&_config, &_device);
     }
     /// @brief Set humidity oversampling amount
@@ -316,7 +323,6 @@ public:
             _heaterConfig.heatr_temp = heaterTemp;
             _heaterConfig.heatr_dur = heaterTime;
         }
-
         return BME68X_OK == bme68x_set_heatr_conf(BME68X_FORCED_MODE, &_heaterConfig, &_device);
     }
 
@@ -336,8 +342,7 @@ public:
             return _measStart + _measPeriod;
         }
 
-        int8_t rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, &_device);
-        if (rslt != BME68X_OK)
+        if (bme68x_set_op_mode(BME68X_FORCED_MODE, &_device) != BME68X_OK)
         {
             return false;
         }
@@ -379,8 +384,7 @@ public:
 
         bme68x_data data;
         uint8_t nFields;
-        int8_t rslt = bme68x_get_data(BME68X_FORCED_MODE, &data, &nFields, &_device);
-        if (rslt != BME68X_OK)
+        if (bme68x_get_data(BME68X_FORCED_MODE, &data, &nFields, &_device) != BME68X_OK)
         {
             return false;
         }
@@ -484,6 +488,6 @@ private:
 
     /// @brief Start time of measurement in ms
     uint32_t _measStart = 0;
-    /// @brief Measure period
+    /// @brief Measure period in ms
     uint16_t _measPeriod = 0;
 };
