@@ -308,6 +308,7 @@ public:
         if ((heaterTemp == 0) || (heaterTime == 0))
         {
             _heaterConfig.enable = BME68X_DISABLE;
+            _heaterConfig.heatr_dur = 0;
         }
         else
         {
@@ -320,8 +321,8 @@ public:
     }
 
     /// @brief Performs a full reading of all 4 sensors in the BME680.
-    /// @note Assigns the internal BME68X#temperature, BME68X#pressure, BME68X#humidity and BME68X#gasResistance member
-    /// variables
+    /// @note Assigns the internal BME68X::temperature, BME68X::pressure, BME68X::humidity and BME68X::gasResistance
+    /// member variables
     /// @return True on success, false if not
     bool performReading() { return endReading(); }
 
@@ -331,7 +332,7 @@ public:
     {
         if (_measStart != 0)
         {
-            /* A measurement is already in progress */
+            // A measurement is already in progress
             return _measStart + _measPeriod;
         }
 
@@ -340,12 +341,13 @@ public:
         {
             return false;
         }
+        _measStart = millis();
 
         // Calculate delay period in microseconds
         const uint32_t delayus_period = (uint32_t)bme68x_get_meas_dur(BME68X_FORCED_MODE, &_config, &_device)
             + ((uint32_t)_heaterConfig.heatr_dur * 1000);
 
-        _measStart = millis();
+        // _measStart = millis();
         _measPeriod = delayus_period / 1000;
 
         return _measStart + _measPeriod;
@@ -367,7 +369,9 @@ public:
         if (remaining_millis > 0)
         {
             // Delay till the measurement is ready
-            delay(remaining_millis * 2);
+            // Serial.printf("d%d\n", remaining_millis);
+            // delay(remaining_millis * 2);
+            delay(remaining_millis);
         }
         // Allow new measurement to begin
         _measStart = 0;
