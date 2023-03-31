@@ -334,7 +334,7 @@ public:
 
     /// @brief Begin an asynchronous reading.
     /// @return When the reading would be ready as absolute time in milliseconds.
-    uint32_t beginReading()
+    uint64_t beginReading()
     {
         if (_measStart != 0)
         {
@@ -346,14 +346,10 @@ public:
         {
             return false;
         }
+
+        // Calculate delay period in milliseconds
         _measStart = millis();
-
-        // Calculate delay period in microseconds
-        const uint32_t delayus_period = (uint32_t)bme68x_get_meas_dur(BME68X_FORCED_MODE, &_config, &_device)
-            + ((uint32_t)_heaterConfig.heatr_dur * 1000);
-
-        // _measStart = millis();
-        _measPeriod = delayus_period / 1000;
+        _measPeriod = bme68x_get_meas_dur(BME68X_FORCED_MODE, &_config, &_device) / 1000 + _heaterConfig.heatr_dur;
 
         return _measStart + _measPeriod;
     }
@@ -364,8 +360,7 @@ public:
     /// @return True on success, false if not
     bool endReading()
     {
-        const uint32_t meas_end = beginReading();
-        if (meas_end == 0)
+        if (beginReading() == 0)
         {
             return false;
         }
@@ -414,12 +409,12 @@ public:
     /// Does not block.
     /// @return Time unitl completion in ms, READING_COMPLETE (0) if complete and READING_NOT_STARTED (-1) if reading
     /// has not been started
-    int remainingReadingMillis() const
+    int64_t remainingReadingMillis() const
     {
         if (_measStart > 0)
         {
             // Measurement is already in progress
-            const int remaining_time = _measPeriod - (millis() - _measStart);
+            const int64_t remaining_time = _measPeriod - (millis() - _measStart);
             return remaining_time < 0 ? READING_COMPLETE : remaining_time;
         }
         return READING_NOT_STARTED;
@@ -487,7 +482,7 @@ private:
     bme68x_heatr_conf _heaterConfig;
 
     /// @brief Start time of measurement in ms
-    uint32_t _measStart = 0;
+    uint64_t _measStart = 0;
     /// @brief Measure period in ms
     uint16_t _measPeriod = 0;
 };
